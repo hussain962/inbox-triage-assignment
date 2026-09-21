@@ -1,0 +1,9 @@
+{
+  "train_rows": 28921,
+  "dim": 65536,
+  "epochs": 8,
+  "augment": 1,
+  "n_intents": 96,
+  "n_actions": 30,
+  "model": "hashing_softmax_sgd"
+}
