@@ -28,15 +28,19 @@ def featurize(text: str, dim: int) -> tuple[np.ndarray, np.ndarray]:
         counts[_stable_hash("w:" + w, dim)] += 1
     for i in range(len(words) - 1):
         counts[_stable_hash("b:" + words[i] + "_" + words[i + 1], dim)] += 1
+    for i in range(len(words) - 2):
+        counts[_stable_hash("t:" + words[i] + "_" + words[i + 1] + "_" + words[i + 2], dim)] += 1
 
-    compact = text.replace("\n", " ")
-    if len(compact) > 1200:
-        compact = compact[:600] + " " + compact[-600:]
-    for n in (3, 4, 5):
-        for i in range(max(0, len(compact) - n + 1)):
-            gram = compact[i : i + n]
-            if gram.strip():
-                counts[_stable_hash(f"c{n}:{gram}", dim)] += 1
+    # Char n-grams only on the last customer turn — enough for typos, cheap to hash.
+    last_cust = ""
+    for line in text.split("\n"):
+        if line.startswith("customer:"):
+            last_cust = line[len("customer:") :].strip()
+    if last_cust:
+        snippet = last_cust[-240:]
+        for n in (3, 4):
+            for i in range(max(0, len(snippet) - n + 1)):
+                counts[_stable_hash(f"c{n}:{snippet[i:i+n]}", dim)] += 1
 
     if not counts:
         return np.zeros(0, dtype=np.int64), np.zeros(0, dtype=np.float64)
@@ -89,7 +93,7 @@ def train_softmax(
     order = list(range(len(texts)))
 
     # Precompute features once — hashing is the expensive part.
-    print("  hashing features...")
+    print("  hashing features...", flush=True)
     cached = [featurize(text, dim) for text in texts]
 
     for epoch in range(epochs):
@@ -114,7 +118,7 @@ def train_softmax(
             if l2:
                 weights[:, idx] *= 1.0 - step * l2
         acc = correct / max(1, len(order))
-        print(f"  epoch {epoch + 1}/{epochs} train-acc={acc:.4f}")
+        print(f"  epoch {epoch + 1}/{epochs} train-acc={acc:.4f}", flush=True)
 
     return SoftmaxModel(classes=classes, weights=weights, dim=dim)
 
