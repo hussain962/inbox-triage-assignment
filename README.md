@@ -14,6 +14,10 @@ numbers we published were measured with `scripts/baseline.py`, not by importing
 that script into the API. Replace the classifier. Keep the HTTP, policy and
 validation layers as the place a second model or a new guideline entry would land.
 
+This checkout already trains a hashing logistic model into
+`app/inference/artifacts/` (`scripts/train_linear.py`). `docker compose up --build`
+loads those artifacts when present; otherwise it falls back to the lexical stand-in.
+
 ```
 app/                 FastAPI service
   api/               HTTP, request and response shapes
