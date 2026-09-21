@@ -29,6 +29,9 @@ data/                splits, schemas, guidelines — see data/README.md
 scripts/
   reproduce.sh       score the live container
   score_live.py      POST each published row
+  score_offline.py   score without HTTP (same grader inputs)
+  train_linear.py    fit hashing softmax artifacts
+  latency_bench.py   p95 latency at stated concurrency
   baseline.py        published lexical baseline (stdlib)
   grader.py          official scorer (stdlib)
 results/             predictions you ship
